@@ -1,0 +1,41 @@
+#!/bin/bash
+
+while true; do
+    clear
+    echo "================================="
+    echo "         HA-Migrate"
+    echo "================================="
+    echo
+    echo "1. Doctor"
+    echo "2. Backup"
+    echo "3. Verify Backup"
+    echo "4. Restore"
+    echo "5. Exit"
+    echo
+    read -p "Choose an option: " choice
+
+    case $choice in
+        1)
+            ./doctor.sh
+            ;;
+        2)
+            ./backup.sh
+            ;;
+        3)
+            ./verify.sh
+            ;;
+        4)
+            ./restore.sh
+            ;;
+        5)
+            echo "Goodbye!"
+            exit 0
+            ;;
+        *)
+            echo "Invalid option!"
+            ;;
+    esac
+
+    echo
+    read -p "Press Enter to continue..."
+done
