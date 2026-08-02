@@ -3,6 +3,13 @@
 BACKUP_DIR="$HOME/ha-migrate/backups"
 HA_CONFIG="/home/ubuntu/homeassistant"
 
+CONTAINER=$(sudo docker ps -a --format "{{.Names}}" | grep -Ei "home|assistant|hass|ha" | head -n1)
+
+if [ -z "$CONTAINER" ]; then
+    echo "[ERROR] Home Assistant container not found!"
+    exit 1
+fi
+
 echo "================================="
 echo "      HA-Migrate Restore"
 echo "================================="
@@ -19,8 +26,7 @@ echo "Available Backups:"
 echo
 
 for i in "${!BACKUPS[@]}"; do
-    FILE=$(basename "${BACKUPS[$i]}")
-    echo "$((i+1)). $FILE"
+    echo "$((i+1)). $(basename "${BACKUPS[$i]}")"
 done
 
 echo
@@ -44,6 +50,7 @@ echo
 echo "[INFO] Selected:"
 echo "$SELECTED_BACKUP"
 
+echo
 read -p "Restore this backup? (y/n): " confirm
 
 if [ "$confirm" != "y" ]; then
@@ -53,7 +60,7 @@ fi
 
 echo
 echo "[INFO] Stopping Home Assistant..."
-sudo docker stop homeassistant
+sudo docker stop "$CONTAINER"
 
 echo
 echo "[INFO] Creating safety backup..."
@@ -69,7 +76,7 @@ if sudo tar -xzf "$SELECTED_BACKUP" -C /; then
 
     echo
     echo "[INFO] Starting Home Assistant..."
-    sudo docker start homeassistant
+    sudo docker start "$CONTAINER"
 
     echo
     echo "[INFO] Removing temporary safety backup..."
@@ -93,10 +100,13 @@ else
 
     echo
     echo "[INFO] Starting Home Assistant..."
-    sudo docker start homeassistant
+    sudo docker start "$CONTAINER"
 
     echo
     echo "[OK] Rollback completed."
 
     exit 1
 fi
+
+echo
+read -p "Press Enter to continue..."
